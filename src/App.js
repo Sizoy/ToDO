@@ -5,7 +5,9 @@ import List from "./components/List";
 
 function App() {
   return (
-    <div className="App">
+    <div>
+      {/* my_tasks приходить з data.js */}
+
       <List tasks={my_tasks} />
     </div>
   );

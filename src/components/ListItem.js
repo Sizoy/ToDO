@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import "./../App.css";
 import ControlButton from "./ControlButton";
 
 const ListItem = (props) => {
   // state
-  const [editor, setEditor] = React.useState(false); // стейт режиму редагування
-  const [text, setText] = React.useState(props.text); // стейт тексту елемента списку
+  const [editor, setEditor] = useState(false); // стейт режиму редагування
+  const [text, setText] = useState(props.text); // стейт тексту елемента списку
+  const [backup, setBackup] = useState(text);
   // action
   function actionToggleEditor() {
     // Функція увімкнення/вимкнення режиму редагування
@@ -18,16 +19,27 @@ const ListItem = (props) => {
   function actionSaveEditing() {
     // Функція вимкнення режиму редагування
     setEditor(false);
+    setBackup(text);
   }
   function actionCancelEditing() {
     //Функція вимкнення редагування і повернення тексту в початковий стан
     setEditor(false);
-    setText(props.text);
+    setText(backup);
   }
   function actionDelete() {
     //Функція, яка видаляє елемент списку при натисканні на іконку видалення
     props.delAction(props.id); // Викликаэться колбек функції видалення, який прийшов з List.js
   }
+
+  //Функція, яка робить елемент списку DONE, приходить з List.js
+  function actionMoveToDone() {
+    props.removeToDoneAction(props.id, text);
+  }
+  //Функція, яка робить елемент списку UNDONE, приходить з List.js
+  function actionMoveToUndone() {
+    props.removeToUndoneAction(props.id);
+  }
+
   return (
     <React.Fragment>
       {/* Якщо режим форматування ВИМКНЕНО */}
@@ -35,8 +47,12 @@ const ListItem = (props) => {
         //якщо стан елмента DONE, даємо йому два класи, інакше один
         <div className={props.done ? "item item--done" : "item"}>
           {/* залежно від стан елемента списку, даємо йому відповідну кнопку */}
-          {!props.done && <ControlButton type="undone" />}
-          {props.done && <ControlButton type="done" />}
+          {!props.done && (
+            <ControlButton type="undone" action={actionMoveToDone} />
+          )}
+          {props.done && (
+            <ControlButton type="done" action={actionMoveToUndone} />
+          )}
 
           <div className="item__text">{text}</div>
 
@@ -60,7 +76,7 @@ const ListItem = (props) => {
             onChange={actionChange} // При написанні тексту викликаємо функцію, яка змінює стейт
           />
           {/* даємо кнопку зберігання відредагованого тексту */}
-          <ControlButton type="do" action={actionSaveEditing} />
+          <ControlButton type="undone" action={actionSaveEditing} />
           {/* даємо кнопку відміни редагованого тексту */}
           <ControlButton type="del" action={actionCancelEditing} />
         </div>
